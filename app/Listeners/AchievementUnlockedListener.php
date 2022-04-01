@@ -33,8 +33,7 @@ class AchievementUnlockedListener
 
         $badge = Badge::query()->where('achievement_count', $achievementCount)->first();
 
-        if($badge)
-        {
+        if($badge){
             BadgeUnlockedEvent::dispatch($badge->name,$user);
             info("Congratulations on earning your new badge :  $badge->name");
         }
