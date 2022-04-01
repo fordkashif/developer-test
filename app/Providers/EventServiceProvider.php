@@ -16,11 +16,18 @@ class EventServiceProvider extends ServiceProvider
      */
     protected $listen = [
         CommentWritten::class => [
-            //
+            CommentWrittenListener::class
         ],
         LessonWatched::class => [
-            //
+            LessonWatchedListener::class
         ],
+        AchievementUnlocked::class => [
+            AchievementUnlockedListener::class
+        ],
+
+        BadgeUnlocked::class => [
+            BadgeUnlockedListener::class
+        ]
     ];
 
     /**
