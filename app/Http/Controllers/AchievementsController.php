@@ -19,10 +19,10 @@ class AchievementsController extends Controller
         $nextAvailableAchievements = $user->availableAchievements() ;
         $achievementCount =  $user->achievements->count();
 
-        $currentBadge =  Badge::query()->where('achievement_count','<=',$achievementCount)
+        $currentBadge =  Badge::query()->where('achievement_count','<=', $achievementCount)
             ->orderBy('achievement_count','desc')->first();
 
-        $nextBadge = Badge::query()->where('achievement_count','>',$achievementCount)
+        $nextBadge = Badge::query()->where('achievement_count','>', $achievementCount)
             ->orderBy('achievement_count','asc')->first();
 
         $diff = $nextBadge && $nextBadge->achievementCount ? $nextBadge->achievementCount - $achievementCount :0;
