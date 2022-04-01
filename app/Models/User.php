@@ -64,4 +64,58 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Lesson::class)->wherePivot('watched', true);
     }
+
+    /**
+     *  The achievements that a user has unlocked
+     */
+    public function achievement()
+    {
+        return $this->belongsToMany(Achievement::class,'user_achievements');
+    }
+
+    public function availableAchievements()
+    {
+            $nextAvailableAchievement = [];
+
+            $lesson = Achievement::query()->where('type', 'lesson')->whereHas('userAchievement')->orderBy('count','desc')->first();
+
+            if($lesson) {
+                $next =  Achievement::query()->where('type', 'lesson')->where('count','>',$lesson->count)->orderBy('count','asc')->first();
+
+                if($next) {
+                    $nextAvailableAchievement[] = $next->name;  //push achievement name to the array
+                }
+            }
+            else {
+
+                $next =  Achievement::query()->where('type', 'lesson')->where('count','>',0)->orderBy('count','asc')->first();
+
+                if($next) {
+                    $nextAvailableAchievement[] = $next->name;  //push achievement name to the array
+                }
+            }
+
+
+            /** get the next achievement for by name for the user */
+            $comment = Achievement::query()->where('type', 'comment')->whereHas('userAchievement')->orderBy('count','desc')->first();
+
+            /** if the user has not unlocked any achievement use count of 0 and display the first available achievement**/
+            if($comment) {
+                $next =  Achievement::query()->where('type', 'comment')->where('count','>',$comment->count)->orderBy('count','asc')->first();
+
+                if($next) {
+                    $nextAvailableAchievement[] = $next->name;  //push achievement name to the array
+                }
+            }
+            else {
+
+                $next =  Achievement::query()->where('type', 'comment')->where('count','>',0)->orderBy('count','asc')->first();
+
+                if($next) {
+                    $nextAvailableAchievement[] = $next->name; 
+                }
+            }
+
+        return $nextAvailableAchievement;
+    }
 }

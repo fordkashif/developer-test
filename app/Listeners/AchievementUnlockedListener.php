@@ -26,6 +26,15 @@ class AchievementUnlockedListener
      */
     public function handle(AchievementUnlocked $event)
     {
-        //
+        $user = $event->user;
+        $achievementCount = $event->count();
+
+        $badge = Badge::query()->where('achievement_count', $achievementCount)->first();
+
+        if($badge)
+        {
+            BadgeUnlockedEvent::dispatch($badge->name,$user);
+            info("Congratulations on earning your new badge :  $badge->name");
+        }
     }
 }
