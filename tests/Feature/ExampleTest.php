@@ -32,11 +32,11 @@ class ExampleTest extends TestCase
         });
     }
 
-    public function test_user_exists(){
+    public function test_userExists(){
         $user = 'mjfordkj';
 
         $response = $this->get("/users/{$user}/achievements");
-        
+
         $response->assertStatus(404);
     }
 }

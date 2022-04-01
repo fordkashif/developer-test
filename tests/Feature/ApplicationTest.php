@@ -4,39 +4,142 @@ namespace Tests\Feature;
 
 use Tests\TestCase;
 use App\Models\User;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\WithFaker;
 
 class ApplicationTest extends TestCase
 {
-    use DatabaseTransactions;
+    use WithFaker;
 
     /**
-     * A basic test example.
+     * Comment Tests
      *
      * @return void
      */
-    public function test_example()
+    
+    public function test_addCommentUnlockFirstAchievements()
     {
         $user = User::factory()->create();
-        
-        $response = $this->get("/users/{$user->id}/achievements");
 
-        $response->assertStatus(200)->assertJson(function (AssertableJson $json) {
-            return
-                $json->whereType('unlocked_achievements', 'array')
-                     ->whereType('next_available_achievements', 'array')
-                     ->whereType('current_badge', 'string')
-                     ->whereType('next_badge', 'string')
-                     ->whereType('remaing_to_unlock_next_badge', 'integer');
+        $data = ['user_id'=>$user->id,'body'=>$this->faker->text];
 
+        $response = $this->post('/users/comment/add',$data);
+
+        $response->assertStatus(200);
+    }
+
+    public function test_addEmptyCommentBody()
+    {
+        $user = User::first();
+
+        $data = ['user_id'=>$user->id];
+
+        $response = $this->post('/users/comment/add',$data);
+
+        $response->assertStatus(302);
+    }
+
+    public function test_sendEmptyUserID()
+    {
+        $data = ['body'=>$this->faker->text];
+
+        $response = $this->post('/users/comment/add',$data);
+
+        $response->assertStatus(302);
+    }
+
+    public function test_sendEmptyParameters()
+    {
+
+        $data = [];
+
+        $response = $this->post('/users/comment/add',$data);
+
+        $response->assertStatus(302);
+    }
+
+    public function testUnlockUpToTenCommentAchievement()
+    {
+        $user = User::first();
+
+        for ($i=0; $i < 10; $i++)
+        {
+            $data = ['user_id'=>$user->id,'body'=>$this->faker->text];
+
+            $response = $this->post('/users/comment/add',$data);
+
+        }
+
+        $response->assertStatus(200)->assertSee(true);
+
+    }
+
+    public function test_unlockAllCommentAchievements()
+    {
+        $user = User::first();
+
+        for ($i=0; $i < 20; $i++)
+        {
+            $data = ['user_id'=>$user->id,'body'=>$this->faker->text];
+
+            $response = $this->post('/users/comment/add',$data);
+
+        }
+
+        $response->assertStatus(200)->assertSee(true);
+
+    }
+
+    /**
+     * Lesson Watched Tests
+     *
+     * @return void
+     */
+
+    public function test_firstAchievementFromLessonWatched()
+    {
+        $user = User::query()->first();
+        $lesson = Lesson::query()->first();
+        $data = ['user_id'=>$user->id,'lesson_id'=>$lesson->id];
+        $response = $this->post('/users/watched-lesson/add',$data);
+        $response->assertStatus(200)->assertSee(true);
+    }
+
+    public function test_addEmptyUserID()
+    {
+        $lesson = Lesson::query()->first();
+        $data = ['lesson_id'=>$lesson->id];
+        $response = $this->post('/users/watched-lesson/add',$data);
+        $response->assertStatus(302);
+    }
+
+    public function test_unlockUpToTenLessonAchievements()
+    {
+
+        $user = User::first();
+        $response = null;
+        Lesson::query()->limit(10)->each(function ($lesson) use ($user,&$response){
+            $data = ['user_id'=>$user->id,'lesson_id'=>$lesson->id];
+            $response = $this->post('/users/watched-lesson/add',$data);
         });
+
+
+        $response->assertStatus(200)->assertSee(true);
+
     }
 
-    public function test_user_exists(){
-        $user = 'mjfordkj';
+    public function testUnlockAllLessonAchievements()
+    {
 
-        $response = $this->get("/users/{$user}/achievements");
-        
-        $response->assertStatus(404);
+        $user = User::first();
+        $response = null;
+        Lesson::query()->each(function ($lesson) use ($user,&$response){
+            $data = ['user_id'=>$user->id,'lesson_id'=>$lesson->id];
+            $response = $this->post('/users/watched-lesson/add',$data);
+        });
+
+        $response->assertStatus(200)->assertSee(true);
+
     }
+
 }
